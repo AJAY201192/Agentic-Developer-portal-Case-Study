@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Agent Hub — UX Case Study</title>
+
+<!-- App's actual font stack -->
+<style>
+/* ─── APP TOKENS (verbatim from colors_and_type.css) ─── */
+:root {
+  --radius: 0.625rem;
+  --background: oklch(0.975 0.003 255);
+  --foreground: oklch(0.18 0.012 265);
+  --surface-1: oklch(0.98 0.003 255);
+  --surface-2: oklch(1 0 0);
+  --surface-3: oklch(0.965 0.004 258);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.18 0.012 265);
+  --primary: oklch(0.58 0.20 258);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.955 0.004 260);
+  --secondary-foreground: oklch(0.22 0.012 265);
+  --muted: oklch(0.955 0.004 260);
+  --muted-foreground: oklch(0.48 0.012 265);
+  --accent: oklch(0.93 0.018 258);
+  --accent-foreground: oklch(0.22 0.012 265);
+  --destructive: oklch(0.58 0.21 27);
+  --destructive-foreground: oklch(1 0 0);
+  --success: oklch(0.60 0.14 150);
+  --warning: oklch(0.72 0.16 70);
+  --border: oklch(0.89 0.005 260);
+  --input: oklch(0.89 0.005 260);
+  --ring: oklch(0.58 0.20 258);
+  --hairline: oklch(0.86 0.006 260);
+  --selected: oklch(0.93 0.04 258);
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+}
+
+/* ─── APP COMPONENT STYLES (verbatim from kit.css) ─── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse-bar { 0% { background-position:0 0; } 100% { background-position:40px 0; } }
+
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; height:36px; padding:0 14px; border-radius:8px; border:1px solid transparent; font:500 14px var(--font-sans); cursor:pointer; white-space:nowrap; }
+.btn-primary { background:var(--primary); color:var(--primary-foreground); font-weight:600; }
+.btn-secondary { background:var(--card); color:var(--foreground); border-color:var(--border); }
+.btn-sm { height:30px; padding:0 10px; font-size:12px; }
+.btn-icon { width:36px; padding:0; }
+.icon-btn { width:28px; height:28px; border-radius:6px; border:1px solid var(--border); background:var(--card); color:var(--foreground); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; font-size:13px; }
+
+.badge { display:inline-flex; align-items:center; gap:5px; padding:2px 8px; border-radius:999px; font:500 10px var(--font-sans); border:1px solid var(--border); background:var(--muted); color:var(--muted-foreground); white-space:nowrap; }
+.badge .dot { width:5px; height:5px; border-radius:999px; background:currentColor; flex-shrink:0; }
+.badge.t-success { background:color-mix(in oklab,var(--success) 14%,transparent); color:var(--success); border-color:color-mix(in oklab,var(--success) 30%,transparent); }
+.badge.t-warning { background:color-mix(in oklab,var(--warning) 14%,transparent); color:var(--warning); border-color:color-mix(in oklab,var(--warning) 30%,transparent); }
+.badge.t-danger  { background:color-mix(in oklab,var(--destructive) 14%,transparent); color:var(--destructive); border-color:color-mix(in oklab,var(--destructive) 30%,transparent); }
+.badge.t-info    { background:color-mix(in oklab,var(--primary) 12%,transparent); color:var(--primary); border-color:color-mix(in oklab,var(--primary) 28%,transparent); }
+
+.card { border:1px solid var(--border); background:var(--card); border-radius:14px; }
+.section-label { font:600 10px var(--font-sans); text-transform:uppercase; letter-spacing:.08em; color:var(--muted-foreground); display:inline-flex; align-items:center; gap:6px; }
+.muted { color:var(--muted-foreground); }
+.info-dot { display:inline-flex; align-items:center; justify-content:center; width:14px; height:14px; border-radius:999px; color:var(--muted-foreground); opacity:.6; font-size:10px; }
+.link { color:var(--primary); text-decoration:none; font-size:12px; display:inline-flex; align-items:center; gap:4px; }
+
+.itile { width:36px; height:36px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; font-size:16px; }
+.itile.sm { width:28px; height:28px; border-radius:8px; font-size:14px; }
+.itile.t-info    { background:color-mix(in oklab,var(--primary) 10%,transparent); color:var(--primary); }
+.itile.t-success { background:color-mix(in oklab,var(--success) 12%,transparent); color:var(--success); }
+.itile.t-warning { background:color-mix(in oklab,var(--warning) 14%,transparent); color:var(--warning); }
+.itile.t-danger  { background:color-mix(in oklab,var(--destructive) 12%,transparent); color:var(--destructive); }
+.itile.t-muted   { background:color-mix(in oklab,var(--muted-foreground) 10%,transparent); color:var(--muted-foreground); }
+
+/* header */
+.app-header { display:flex; align-items:center; gap:12px; padding:0 20px; background:var(--surface-1); border-bottom:1px solid var(--border); height:64px; }
+.brand-mark { width:36px; height:36px; border-radius:10px; background:color-mix(in oklab,var(--primary) 12%,transparent); color:var(--primary); display:inline-flex; align-items:center; justify-content:center; font-size:18px; }
+.app-header .brand-name { font:600 15px var(--font-sans); letter-spacing:-.01em; }
+.app-header .brand-sub { font-size:11px; color:var(--muted-foreground); }
+.avatar { width:36px; height:36px; border-radius:999px; background:color-mix(in oklab,var(--primary) 12%,transparent); color:var(--primary); display:inline-flex; align-items:center; justify-content:center; font:600 12px var(--font-sans); border:1px solid color-mix(in oklab,var(--primary) 22%,transparent); }
+
+/* repo rail */
+.rl-head { padding:14px; border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:10px; }
+.rl-head-row { display:flex; align-items:center; justify-content:space-between; }
+.ff { display:flex; flex-direction:column; gap:5px; }
+.ff-label { font:600 10px var(--font-sans); text-transform:uppercase; letter-spacing:.08em; color:var(--muted-foreground); display:inline-flex; align-items:center; gap:5px; }
+.input { height:32px; width:100%; border:1px solid var(--input); border-radius:8px; padding:0 10px 0 30px; background:var(--card); color:var(--foreground); font:400 13px var(--font-sans); outline:none; }
+.input-wrap { position:relative; }
+.lead-icon { position:absolute; left:9px; top:50%; transform:translateY(-50%); color:var(--muted-foreground); font-size:13px; }
+.rl-filter-bar { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.rl-list { display:flex; flex-direction:column; }
+.rl-item { position:relative; display:block; width:100%; text-align:left; background:transparent; border:0; padding:13px 15px; border-bottom:1px solid var(--border); cursor:pointer; color:var(--foreground); font-family:var(--font-sans); }
+.rl-item.selected { background:color-mix(in oklab,var(--primary) 7%,transparent); }
+.rl-item.selected::before { content:""; position:absolute; inset:0 auto 0 0; width:3px; background:var(--primary); border-radius:0; }
+.rl-item .name-row { display:flex; align-items:center; gap:8px; }
+.rl-item .name { font:600 13.5px var(--font-sans); }
+.rl-item .desc { margin:5px 0 0; font-size:12px; color:var(--muted-foreground); line-height:1.4; }
+.rl-item .meta { margin-top:9px; display:flex; align-items:center; justify-content:space-between; }
+.rl-item .ts { font-size:11px; color:var(--muted-foreground); }
+.name-dot { width:7px; height:7px; border-radius:999px; background:var(--success); flex-shrink:0; }
+.name-dot.warn { background:var(--destructive); }
+
+/* center: overview */
+.overview-pad { padding:24px 28px; display:flex; flex-direction:column; gap:22px; }
+.title-row { display:flex; gap:16px; align-items:flex-start; justify-content:space-between; }
+.repo-h1 { margin:0; font:700 26px var(--font-sans); letter-spacing:-.02em; }
+.repo-desc { margin:5px 0 0; color:var(--muted-foreground); font-size:13px; }
+.repo-meta { display:flex; gap:12px; margin-top:9px; align-items:center; color:var(--muted-foreground); font-size:12px; }
+.rm-item { display:inline-flex; align-items:center; gap:5px; }
+.metric-grid-4 { display:grid; gap:12px; grid-template-columns:repeat(4,minmax(0,1fr)); }
+.metric-card { padding:14px; display:flex; gap:12px; align-items:center; }
+.metric-value { font:700 20px var(--font-sans); margin-top:3px; letter-spacing:-.01em; }
+.rec { position:relative; display:flex; align-items:center; gap:14px; border:1px solid color-mix(in oklab,var(--primary) 30%,var(--border)); background:color-mix(in oklab,var(--primary) 5%,var(--card)); border-radius:14px; padding:14px 16px; }
+.rec::before { content:""; position:absolute; inset:0 auto 0 0; width:3px; background:var(--primary); border-radius:14px 0 0 14px; }
+.rec-title { font:600 14px var(--font-sans); }
+.rec-context { margin-top:3px; font-size:12px; color:var(--muted-foreground); }
+.health-grid-3 { display:grid; gap:12px; grid-template-columns:repeat(3,minmax(0,1fr)); }
+.health-card { padding:16px; display:flex; flex-direction:column; gap:8px; }
+.hc-top { display:flex; gap:10px; align-items:center; }
+.hc-vrow { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:4px; }
+.hc-value { font:700 20px var(--font-sans); letter-spacing:-.01em; }
+.hc-sub { margin:0; font-size:11.5px; color:var(--muted-foreground); line-height:1.4; }
+.hc-sugg { margin-top:auto; border-top:1px solid var(--border); padding-top:9px; display:flex; gap:6px; align-items:flex-start; font-size:11.5px; color:var(--muted-foreground); }
+.intel { overflow:hidden; }
+.intel-row { position:relative; display:flex; gap:11px; padding:13px 15px; border-bottom:1px solid var(--border); align-items:flex-start; }
+.intel-row:last-child { border-bottom:0; }
+.intel-row::before { content:""; position:absolute; inset:8px auto 8px 0; width:3px; border-radius:0 3px 3px 0; }
+.intel-row.tone-danger::before  { background:var(--destructive); }
+.intel-row.tone-warning::before { background:var(--warning); }
+.intel-row.tone-success::before { background:transparent; }
+.intel-title { margin:0; font:600 13px var(--font-sans); }
+.intel-detail { margin:3px 0 0; font-size:11.5px; color:var(--muted-foreground); line-height:1.4; }
+.intel-title-row { display:flex; gap:7px; align-items:center; flex-wrap:wrap; }
+
+/* agent panel */
+.ae-head { padding:16px 18px 13px; border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:7px; }
+.ae-head-row { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.ae-head-actions { display:flex; gap:5px; }
+.ae-subtitle { font-size:13px; }
+.ae-body { flex:1; overflow-y:auto; padding:14px 18px; display:flex; flex-direction:column; gap:13px; }
+.ae-empty { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:32px 18px; color:var(--muted-foreground); }
+.ae-empty-icon { width:48px; height:48px; border-radius:12px; background:var(--muted); display:inline-flex; align-items:center; justify-content:center; margin-bottom:12px; color:var(--muted-foreground); font-size:22px; }
+.ae-empty-title { font:600 14px var(--font-sans); color:var(--foreground); margin-bottom:5px; }
+.ae-empty-sub { margin:0; font-size:12px; line-height:1.5; max-width:240px; }
+.status-card { padding:16px; display:flex; flex-direction:column; gap:12px; }
+.sc-row { display:flex; align-items:center; justify-content:space-between; }
+.sc-task { font:700 17px var(--font-sans); letter-spacing:-.01em; margin-top:-3px; }
+.sc-phase-row { display:grid; grid-template-columns:auto 1fr auto; gap:12px; align-items:center; }
+.sc-phase-icon { width:34px; height:34px; border-radius:999px; background:color-mix(in oklab,var(--success) 12%,transparent); display:inline-flex; align-items:center; justify-content:center; color:var(--success); font-size:18px; }
+.sc-phase-name { font:600 15px var(--font-sans); margin-top:2px; }
+.sc-elapsed { font:700 17px var(--font-mono); margin-top:2px; }
+.sc-elapsed.danger { color:var(--destructive); }
+.spinner { width:17px; height:17px; border-radius:999px; border:2.5px solid color-mix(in oklab,var(--primary) 25%,transparent); border-top-color:var(--primary); animation:spin .8s linear infinite; }
+.phase-line { display:flex; align-items:center; padding:4px 0; }
+.phase-step { display:flex; flex-direction:column; align-items:center; gap:5px; flex:0 0 auto; min-width:54px; }
+.phase-bullet { width:26px; height:26px; border-radius:999px; display:inline-flex; align-items:center; justify-content:center; background:var(--muted); color:var(--muted-foreground); border:1.5px solid var(--border); font:600 10px var(--font-sans); }
+.phase-step.state-done .phase-bullet { background:var(--success); color:#fff; border-color:var(--success); }
+.phase-step.state-active .phase-bullet { background:color-mix(in oklab,var(--primary) 12%,transparent); color:var(--primary); border-color:var(--primary); }
+.phase-step.state-failed .phase-bullet { background:var(--destructive); color:#fff; border-color:var(--destructive); }
+.phase-label { font-size:9.5px; color:var(--muted-foreground); }
+.phase-step.state-done .phase-label, .phase-step.state-active .phase-label { color:var(--foreground); font-weight:500; }
+.phase-conn { flex:1; height:1.5px; background:var(--border); margin:0 -1px; align-self:flex-start; margin-top:12px; }
+.phase-conn.done { background:var(--success); }
+.sc-bar { height:3px; border-radius:999px; background:var(--muted); overflow:hidden; }
+.sc-bar.success .sc-bar-fill { background:var(--success); width:100%; height:100%; }
+.sc-bar.running .sc-bar-fill { background:var(--primary); width:65%; height:100%; animation:pulse-bar 1.4s linear infinite; }
+.sc-times { display:flex; justify-content:space-between; align-items:center; font:500 11.5px var(--font-mono); color:var(--foreground); }
+.sc-times .muted { color:var(--muted-foreground); margin:0 3px; }
+.time-dot { display:inline-block; width:6px; height:6px; border-radius:999px; margin:0 3px; vertical-align:middle; }
+.time-dot.ok { background:var(--success); }
+.time-dot.active { background:var(--primary); }
+.sc-meta { display:flex; flex-direction:column; gap:7px; padding-top:10px; border-top:1px solid var(--border); }
+.sc-meta-row { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.outcome-card { padding:16px; display:flex; flex-direction:column; gap:12px; }
+.outcome-card.outcome-success { border-color:color-mix(in oklab,var(--success) 28%,var(--border)); background:color-mix(in oklab,var(--success) 4%,var(--card)); }
+.outcome-card.outcome-fail { border-color:color-mix(in oklab,var(--destructive) 30%,var(--border)); background:color-mix(in oklab,var(--destructive) 4%,var(--card)); }
+.oc-head { display:flex; align-items:center; justify-content:space-between; }
+.oc-headline { font:700 15px var(--font-sans); letter-spacing:-.01em; margin-top:-5px; }
+.oc-impact-note { font-size:12px; color:var(--muted-foreground); margin-top:-7px; }
+.oc-block { display:flex; flex-direction:column; gap:7px; padding:10px; background:var(--card); border:1px solid var(--border); border-radius:10px; }
+.oc-impact-grid { display:grid; grid-template-columns:1fr auto 1fr; gap:8px; align-items:center; }
+.oc-impact-side { font-size:11.5px; color:var(--muted-foreground); line-height:1.4; }
+.oc-impact-side.strong { color:var(--foreground); font-weight:500; }
+.oc-changes { margin:0; padding-left:15px; display:flex; flex-direction:column; gap:4px; }
+.oc-changes li { font-size:12px; line-height:1.4; color:color-mix(in oklab,var(--foreground) 85%,transparent); }
+.oc-next { display:flex; flex-direction:column; gap:5px; padding:10px; background:color-mix(in oklab,var(--primary) 5%,var(--card)); border:1px solid color-mix(in oklab,var(--primary) 25%,var(--border)); border-radius:10px; }
+.oc-next.danger { background:color-mix(in oklab,var(--destructive) 6%,var(--card)); border-color:color-mix(in oklab,var(--destructive) 30%,var(--border)); }
+.oc-next-text { font-size:12px; line-height:1.4; }
+.oc-confidence { display:flex; gap:8px; align-items:flex-start; font-size:11.5px; }
+.insight-card { padding:13px 15px; }
+.insight-card.fail { border-color:color-mix(in oklab,var(--destructive) 25%,var(--border)); background:color-mix(in oklab,var(--destructive) 3%,var(--card)); }
+.insight-text { margin:5px 0 0; font-size:12px; line-height:1.5; color:color-mix(in oklab,var(--foreground) 90%,transparent); }
+.fail-banner { padding:9px 11px; border-radius:10px; background:color-mix(in oklab,var(--destructive) 8%,transparent); border:1px solid color-mix(in oklab,var(--destructive) 25%,var(--border)); color:var(--destructive); font-size:12px; line-height:1.4; }
+.log { font-family:var(--font-mono); font-size:11.5px; line-height:1.7; padding:11px 13px; overflow-y:auto; }
+.log .ts { color:var(--muted-foreground); margin-right:8px; }
+.log .err { color:var(--destructive); }
+
+/* modal */
+.modal { width:100%; max-width:520px; background:var(--card); border:1px solid var(--border); border-radius:16px; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 8px 40px -8px color-mix(in oklab,var(--foreground) 18%,transparent); }
+.modal-head { padding:18px 20px; display:flex; align-items:flex-start; justify-content:space-between; border-bottom:1px solid var(--border); }
+.modal h2 { margin:0; font:600 17px var(--font-sans); letter-spacing:-.01em; }
+.modal-sub { margin:4px 0 0; font-size:12.5px; color:var(--muted-foreground); }
+.modal-body { padding:12px; display:flex; flex-direction:column; gap:7px; }
+.modal-foot { padding:13px 20px; border-top:1px solid var(--border); background:var(--muted); display:flex; justify-content:flex-end; gap:8px; }
+.task { display:flex; gap:13px; padding:13px; border:1px solid var(--border); border-radius:12px; background:var(--card); cursor:pointer; text-align:left; color:var(--foreground); font-family:var(--font-sans); }
+.task.sel { border-color:var(--primary); background:color-mix(in oklab,var(--primary) 6%,transparent); box-shadow:0 0 0 1px var(--primary) inset; }
+.radio { margin-top:2px; width:17px; height:17px; border-radius:999px; border:1.5px solid var(--border); background:var(--background); display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
+.task.sel .radio { border-color:var(--primary); }
+.radio-inner { width:7px; height:7px; border-radius:999px; background:var(--primary); }
+.task-name { font:600 13.5px var(--font-sans); }
+.task-desc { margin:3px 0 0; font-size:12px; color:var(--muted-foreground); line-height:1.4; }
+.task-bf { margin:7px 0 0; font-size:10.5px; color:var(--muted-foreground); }
+.task-bf b { font-weight:600; letter-spacing:.05em; }
+
+/* app footer */
+.app-footer { display:flex; align-items:center; justify-content:space-between; padding:0 20px; height:32px; background:var(--surface-1); border-top:1px solid var(--border); font-size:11px; color:var(--muted-foreground); }
+
+/* ─── CASE STUDY LAYOUT STYLES ─── */
+body {
+  background: oklch(0.96 0.004 255);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Cover */
+.cs-cover {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 56px 64px;
+}
+.cs-cover-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 60px;
+  align-items: center;
+}
+.cs-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font: 600 11px var(--font-sans);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin-bottom: 18px;
+}
+.cs-eyebrow::before {
+  content: '';
+  width: 18px;
+  height: 2px;
+  background: var(--primary);
+  border-radius: 2px;
+  display: block;
+}
+.cs-h1 {
+  font: 700 40px var(--font-sans);
+  letter-spacing: -.025em;
+  line-height: 1.08;
+  margin-bottom: 14px;
+}
+.cs-h1 em { font-style: normal; color: var(--primary); }
+.cs-desc {
+  font-size: 14px;
+  color: var(--muted-foreground);
+  line-height: 1.65;
+  margin-bottom: 28px;
+}
+.cs-meta { display: flex; gap: 24px; padding-top: 20px; border-top: 1px solid var(--border); }
+.cs-meta-item { display: flex; flex-direction: column; gap: 3px; }
+.cs-meta-label { font: 600 10px var(--font-sans); letter-spacing: .1em; text-transform: uppercase; color: var(--muted-foreground); }
+.cs-meta-val { font: 600 13px var(--font-sans); }
+
+/* App preview chrome */
+.app-chrome {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px color-mix(in oklab,var(--foreground) 8%,transparent), 0 1px 4px color-mix(in oklab,var(--foreground) 4%,transparent);
+}
+.chrome-bar {
+  height: 28px;
+  background: var(--surface-1);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 6px;
+}
+.chrome-dot { width: 9px; height: 9px; border-radius: 50%; }
+
+/* Section */
+.cs-section {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 56px 64px;
+}
+.cs-section + .cs-section { padding-top: 0; }
+
+/* Section header row */
+.cs-section-head {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.cs-step {
+  font: 700 11px var(--font-sans);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--primary);
+  background: color-mix(in oklab, var(--primary) 10%, transparent);
+  border: 1px solid color-mix(in oklab, var(--primary) 22%, transparent);
+  border-radius: 20px;
+  padding: 3px 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.cs-section-title {
+  font: 700 22px var(--font-sans);
+  letter-spacing: -.02em;
+  margin-bottom: 5px;
+}
+.cs-section-sub {
+  font-size: 13px;
+  color: var(--muted-foreground);
+  line-height: 1.6;
+}
+
+/* The core "feature row": component left, annotation right */
+.feature-row {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 24px;
+  align-items: start;
+  margin-bottom: 20px;
+}
+.feature-row.flip {
+  grid-template-columns: 340px 1fr;
+}
+.feature-row.flip .fr-component { order: 2; }
+.feature-row.flip .fr-annotations { order: 1; }
+
+/* Component display area */
+.fr-component {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.fr-component.no-overflow { overflow: visible; }
+
+/* Annotations column */
+.fr-annotations {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Annotation card — the highlighted explanatory text */
+.ann {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  border-left: 3px solid var(--primary);
+  padding: 14px 16px;
+}
+.ann.success { border-left-color: var(--success); }
+.ann.warning { border-left-color: var(--warning); }
+.ann.danger  { border-left-color: var(--destructive); }
+
+.ann-title {
+  font: 700 10px var(--font-sans);
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin-bottom: 7px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ann.success .ann-title { color: var(--success); }
+.ann.warning .ann-title { color: var(--warning); }
+.ann.danger  .ann-title { color: var(--destructive); }
+
+.ann-title::before {
+  content: '';
+  display: block;
+  width: 14px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.ann-text {
+  font-size: 12.5px;
+  color: var(--foreground);
+  line-height: 1.6;
+}
+.ann-text strong { font-weight: 600; }
+
+/* Highlighted insight callout (full-width) */
+.insight-callout {
+  background: color-mix(in oklab, var(--primary) 6%, transparent);
+  border: 1px solid color-mix(in oklab, var(--primary) 20%, transparent);
+  border-radius: 10px;
+  padding: 14px 18px;
+  font-size: 13px;
+  color: var(--foreground);
+  line-height: 1.65;
+  margin-top: 4px;
+}
+.insight-callout strong { font-weight: 600; }
+.insight-callout.success { background: color-mix(in oklab, var(--success) 6%, transparent); border-color: color-mix(in oklab, var(--success) 20%, transparent); }
+.insight-callout.warning { background: color-mix(in oklab, var(--warning) 6%, transparent); border-color: color-mix(in oklab, var(--warning) 22%, transparent); }
+.insight-callout.danger  { background: color-mix(in oklab, var(--destructive) 6%, transparent); border-color: color-mix(in oklab, var(--destructive) 22%, transparent); }
+
+/* Rule between sections */
+.cs-rule { height: 1px; background: var(--border); margin: 0 64px; }
+
+/* Two-col equal */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; align-items: start; }
+
+/* Mini app shell for cover preview */
+.mini-shell { font-size: 13px; }
+.mini-header { display:flex; align-items:center; gap:10px; padding:0 16px; height:52px; background:var(--surface-1); border-bottom:1px solid var(--border); }
+.mini-body { display:grid; grid-template-columns:200px 1fr 240px; height:260px; }
+.mini-rail { background:var(--surface-1); border-right:1px solid var(--border); display:flex; flex-direction:column; }
+.mini-center { background:var(--surface-2); padding:16px; display:flex; flex-direction:column; gap:12px; overflow:hidden; }
+.mini-aside { background:var(--surface-3); border-left:1px solid var(--border); display:flex; flex-direction:column; }
+.mini-footer { height:26px; background:var(--surface-1); border-top:1px solid var(--border); display:flex; align-items:center; padding:0 16px; font-size:10px; color:var(--muted-foreground); justify-content:space-between; }
+
+/* page footer */
+.cs-footer {
+  background: var(--card);
+  border-top: 1px solid var(--border);
+  padding: 20px 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--muted-foreground);
+}
+
+
+/* ─── FINAL PRESENTATION POLISH OVERRIDES ─── */
+:root {
+  --presentation-border: color-mix(in oklab, var(--foreground) 7%, transparent);
+  --presentation-soft: color-mix(in oklab, var(--foreground) 3%, var(--card));
+}
+
+/* Make the case-study page more Swiss/minimal and less card-heavy */
+.cs-cover { padding: 68px 64px; }
+.cs-cover-inner { gap: 72px; }
+.cs-section { padding: 64px 64px; }
+.cs-section-head { margin-bottom: 36px; align-items: flex-start; }
+.cs-section-title { font-size: 24px; letter-spacing: -.025em; }
+.cs-section-sub { max-width: 760px; line-height: 1.7; }
+
+/* Remove colored left borders / decorative side accents */
+.ann,
+.ann.success,
+.ann.warning,
+.ann.danger {
+  border-left: 0 !important;
+  border-color: var(--presentation-border) !important;
+  background: color-mix(in oklab, var(--card) 94%, var(--surface-1));
+  box-shadow: none;
+  padding: 16px 18px;
+}
+.ann-title::before { display: none !important; }
+.ann-title { margin-bottom: 8px; letter-spacing: .11em; color: var(--muted-foreground) !important; }
+.ann.success .ann-title,
+.ann.warning .ann-title,
+.ann.danger .ann-title { color: var(--muted-foreground) !important; }
+.ann-text { color: color-mix(in oklab, var(--foreground) 88%, transparent); line-height: 1.65; }
+
+/* Remove vertical accent strips from app-demo elements */
+.rl-item.selected::before,
+.rec::before,
+.intel-row::before { display: none !important; }
+
+.rl-item.selected {
+  background: color-mix(in oklab, var(--foreground) 4%, transparent) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--foreground) 8%, transparent);
+}
+.rl-item { border-bottom-color: color-mix(in oklab, var(--foreground) 6%, transparent); }
+
+.rec {
+  border-color: var(--presentation-border) !important;
+  background: color-mix(in oklab, var(--card) 92%, var(--surface-1)) !important;
+  padding: 16px 18px;
+}
+
+.card,
+.fr-component,
+.modal,
+.task,
+.app-chrome {
+  border-color: var(--presentation-border) !important;
+}
+
+/* Quieter cards and task modal */
+.task { background: color-mix(in oklab, var(--card) 96%, var(--surface-1)); }
+.task.sel {
+  border-color: color-mix(in oklab, var(--primary) 24%, var(--presentation-border)) !important;
+  background: color-mix(in oklab, var(--primary) 4%, var(--card)) !important;
+  box-shadow: none !important;
+}
+.modal-body { gap: 9px; }
+.modal-foot { background: color-mix(in oklab, var(--foreground) 3%, var(--card)); }
+
+/* Recommended Action section: annotation cards below the selected task/recommendation */
+.recommended-block { display: flex; flex-direction: column; gap: 14px; }
+.rec-explain-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.rec-explain-grid .ann { min-height: 120px; }
+.task-selection-layout {
+  display: grid;
+  grid-template-columns: minmax(320px, .9fr) minmax(360px, 1.1fr);
+  gap: 28px;
+  align-items: start;
+}
+.task-modal-side { display:flex; flex-direction:column; gap:16px; }
+
+/* Cleaner feature grid behavior */
+.feature-row,
+.feature-row.flip,
+.two-col,
+.three-col {
+  gap: 28px;
+}
+.fr-annotations { gap: 14px; }
+
+/* Presentation responsiveness */
+@media (max-width: 1080px) {
+  .cs-cover-inner { grid-template-columns: 1fr; gap: 36px; }
+  .feature-row,
+  .feature-row.flip,
+  .two-col,
+  .task-selection-layout {
+    grid-template-columns: 1fr !important;
+  }
+  .feature-row.flip .fr-component,
+  .feature-row.flip .fr-annotations { order: initial; }
+  .cs-section { padding: 48px 28px; }
+  .cs-cover { padding: 52px 28px; }
+  .cs-rule { margin: 0 28px; }
+}
+
+@media (max-width: 720px) {
+  .cs-h1 { font-size: 32px; }
+  .cs-meta { flex-direction: column; gap: 12px; }
+  .rec-explain-grid,
+  .health-grid-3,
+  .metric-grid-4,
+  .three-col { grid-template-columns: 1fr !important; }
+  .mini-body { grid-template-columns: 1fr; height: auto; }
+  .mini-rail,
+  .mini-aside { min-height: 180px; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════ COVER ══════════════════════════ -->
+<div class="cs-cover">
+  <div class="cs-cover-inner">
+    <div>
+      <div class="cs-eyebrow">UX Case Study · 2026</div>
+      <h1 class="cs-h1">Agentic<br/><em>Developer Portal</em></h1>
+      <p class="cs-desc">An AI-native internal tool designed to surface intelligent automation, reduce cognitive load, and make AI execution transparent and trustworthy for engineering teams.</p>
+      <div class="cs-meta">
+        <div class="cs-meta-item"><span class="cs-meta-label">Role</span><span class="cs-meta-val">UX / Product Design</span></div>
+        <div class="cs-meta-item"><span class="cs-meta-label">Platform</span><span class="cs-meta-val">Web · AI-Native</span></div>
+        <div class="cs-meta-item"><span class="cs-meta-label">Users</span><span class="cs-meta-val">Internal Engineering</span></div>
+      </div>
+    </div>
+
+    <!-- Live mini preview of actual app -->
+    <div class="app-chrome">
+      <div class="chrome-bar">
+        <div class="chrome-dot" style="background:#fc6058"></div>
+        <div class="chrome-dot" style="background:#fec02f"></div>
+        <div class="chrome-dot" style="background:#2aca44"></div>
+      </div>
+      <div class="mini-shell">
+        <div class="mini-header">
+          <div class="brand-mark" style="width:28px;height:28px;border-radius:8px;font-size:13px;">✦</div>
+          <div><div style="font:600 13px var(--font-sans)">Agentic Developer Portal</div><div style="font-size:10px;color:var(--muted-foreground)">Internal · Engineering</div></div>
+          <div style="flex:1"></div>
+          <div class="avatar" style="width:28px;height:28px;font-size:10px;">AM</div>
+        </div>
+        <div class="mini-body">
+          <!-- Rail -->
+          <div class="mini-rail">
+            <div style="padding:10px 12px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:7px;">
+              <div style="font:600 9px var(--font-sans);text-transform:uppercase;letter-spacing:.08em;color:var(--muted-foreground);">Repositories</div>
+              <div style="height:22px;border:1px solid var(--border);border-radius:6px;background:var(--card);display:flex;align-items:center;padding:0 7px;gap:5px;font-size:10px;color:var(--muted-foreground);">🔍 Search…</div>
+            </div>
+            <div class="rl-list">
+              <div class="rl-item selected" style="padding:9px 11px;">
+                <div class="name-row"><div class="name-dot"></div><div class="name" style="font-size:11.5px;">design-system-core</div></div>
+                <div class="meta"><span class="badge" style="font-size:9px;">TypeScript</span><span class="ts" style="font-size:10px;">2h ago</span></div>
+              </div>
+              <div class="rl-item" style="padding:9px 11px;">
+                <div class="name-row"><div class="name-dot warn"></div><div class="name" style="font-size:11.5px;">payment-orchestration</div></div>
+                <div class="meta"><span class="badge" style="font-size:9px;">Go</span><span class="ts" style="font-size:10px;">5h ago</span></div>
+              </div>
+              <div class="rl-item" style="padding:9px 11px;">
+                <div class="name-row"><div class="name-dot"></div><div class="name" style="font-size:11.5px;">developer-portal</div></div>
+                <div class="meta"><span class="badge" style="font-size:9px;">TypeScript</span><span class="ts" style="font-size:10px;">30m ago</span></div>
+              </div>
+              <div class="rl-item" style="padding:9px 11px;">
+                <div class="name-row"><div class="name-dot warn"></div><div class="name" style="font-size:11.5px;">dependency-scanner</div></div>
+                <div class="meta"><span class="badge" style="font-size:9px;">Python</span><span class="ts" style="font-size:10px;">8h ago</span></div>
+              </div>
+            </div>
+          </div>
+          <!-- Center -->
+          <div class="mini-center">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div><div style="font:700 16px var(--font-sans);letter-spacing:-.02em">design-system-core</div><div style="font-size:10px;color:var(--muted-foreground);margin-top:2px">Shared design tokens, primitives, and component library.</div></div>
+              <button class="btn btn-primary btn-sm" style="font-size:10px;height:26px;padding:0 10px;">▶ Run Agent Task</button>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
+              <div class="card metric-card" style="padding:8px 10px;gap:7px;"><span class="itile t-info" style="width:22px;height:22px;border-radius:6px;font-size:11px;">👤</span><div><div class="section-label" style="font-size:8px;">CONTRIBUTORS</div><div style="font:700 14px var(--font-sans);">14</div></div></div>
+              <div class="card metric-card" style="padding:8px 10px;gap:7px;"><span class="itile t-info" style="width:22px;height:22px;border-radius:6px;font-size:11px;">↑</span><div><div class="section-label" style="font-size:8px;">OPEN PRS</div><div style="font:700 14px var(--font-sans);">4</div></div></div>
+              <div class="card metric-card" style="padding:8px 10px;gap:7px;"><span class="itile t-info" style="width:22px;height:22px;border-radius:6px;font-size:11px;">★</span><div><div class="section-label" style="font-size:8px;">STARS</div><div style="font:700 14px var(--font-sans);">1,284</div></div></div>
+              <div class="card metric-card" style="padding:8px 10px;gap:7px;"><span class="itile t-info" style="width:22px;height:22px;border-radius:6px;font-size:11px;">⚡</span><div><div class="section-label" style="font-size:8px;">ACTIVITY</div><div style="font:700 14px var(--font-sans);font-size:11px;">Latest</div></div></div>
+            </div>
+            <div class="rec" style="padding:9px 11px;gap:8px;">
+              <span class="itile t-info" style="width:24px;height:24px;border-radius:7px;font-size:11px;">✦</span>
+              <div style="flex:1"><div class="rec-title" style="font-size:11px;">Upgrade Dependencies</div><div class="rec-context" style="font-size:10px;">Highest-leverage next step given current repository signals.</div></div>
+              <button class="btn btn-primary btn-sm" style="height:22px;padding:0 8px;font-size:10px;">Run →</button>
+            </div>
+          </div>
+          <!-- Aside -->
+          <div class="mini-aside">
+            <div style="padding:12px 14px;border-bottom:1px solid var(--border);">
+              <div class="section-label" style="font-size:9px;">AGENT EXECUTION</div>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;text-align:center;color:var(--muted-foreground);">
+              <div style="font-size:22px;margin-bottom:8px;opacity:.5;">📥</div>
+              <div style="font:600 11px var(--font-sans);color:var(--foreground);">No execution running</div>
+              <div style="font-size:10px;margin-top:3px;line-height:1.4;">Start an agent task to see live progress.</div>
+            </div>
+          </div>
+        </div>
+        <div class="mini-footer">
+          <span>Agentic Developer Portal · © 2026</span>
+          <span>● All systems operational · v1.0.0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════ 01 · THREE-PANEL LAYOUT ══════════════════════════ -->
+<div class="cs-section">
+  <div class="cs-section-head">
+    <span class="cs-step">01</span>
+    <div>
+      <div class="cs-section-title">Three-Panel Layout</div>
+      <div class="cs-section-sub">One screen — repository navigation, intelligence, and live execution monitoring — all persistent, all visible at once. No context switching, no lost state.</div>
+    </div>
+  </div>
+
+  <div class="feature-row" style="grid-template-columns:1fr 320px;">
+    <!-- The actual layout diagram using real component classes -->
+    <div class="fr-component">
+      <div style="display:grid;grid-template-columns:220px 1fr 220px;height:320px;font-size:12px;">
+        <!-- Panel 1 label -->
+        <div style="background:var(--surface-1);border-right:1px solid var(--border);display:flex;flex-direction:column;">
+          <div style="padding:10px 12px;border-bottom:1px solid var(--border);background:color-mix(in oklab,var(--primary) 5%,var(--surface-1));">
+            <div class="section-label" style="font-size:8.5px;color:var(--primary);">① REPOSITORY NAV</div>
+            <div style="font-size:10px;color:var(--muted-foreground);margin-top:3px;">Browse & select repos</div>
+          </div>
+          <div>
+            <div class="rl-item selected" style="padding:10px 12px;">
+              <div class="name-row"><div class="name-dot"></div><div class="name" style="font-size:12px;">design-system-core</div></div>
+              <div class="meta"><span class="badge" style="font-size:9px;">TypeScript</span><span class="ts">2h ago</span></div>
+            </div>
+            <div class="rl-item" style="padding:10px 12px;">
+              <div class="name-row"><div class="name-dot warn"></div><div class="name" style="font-size:12px;">payment-orchestration</div></div>
+              <div class="meta"><span class="badge" style="font-size:9px;">Go</span><span class="ts">5h ago</span></div>
+            </div>
+            <div class="rl-item" style="padding:10px 12px;">
+              <div class="name-row"><div class="name-dot"></div><div class="name" style="font-size:12px;">developer-portal</div></div>
+              <div class="meta"><span class="badge" style="font-size:9px;">TypeScript</span><span class="ts">30m ago</span></div>
+            </div>
+            <div class="rl-item" style="padding:10px 12px;">
+              <div class="name-row"><div class="name-dot warn"></div><div class="name" style="font-size:12px;">mobile-auth-service</div></div>
+              <div class="meta"><span class="badge" style="font-size:9px;">Swift</span><span class="ts">3h ago</span></div>
+            </div>
+          </div>
+        </div>
+        <!-- Panel 2 -->
+        <div style="background:var(--surface-2);border-right:1px solid var(--border);padding:14px;display:flex;flex-direction:column;gap:10px;">
+          <div style="background:color-mix(in oklab,var(--success) 5%,var(--surface-2));border:1px solid color-mix(in oklab,var(--success) 15%,var(--border));border-radius:6px;padding:7px 10px;">
+            <div class="section-label" style="font-size:8.5px;color:var(--success);">② INTELLIGENCE & ACTIONS</div>
+            <div style="font-size:10px;color:var(--muted-foreground);margin-top:2px;">Context, health, recommended action</div>
+          </div>
+          <div style="font:700 14px var(--font-sans);letter-spacing:-.01em;">design-system-core</div>
+          <div class="rec" style="padding:8px 10px;gap:8px;font-size:11px;">
+            <span class="itile t-info" style="width:22px;height:22px;border-radius:6px;font-size:11px;">✦</span>
+            <div style="flex:1"><div style="font:600 12px var(--font-sans);">Upgrade Dependencies</div><div style="font-size:10px;color:var(--muted-foreground);">Highest-leverage next step.</div></div>
+            <button class="btn btn-primary btn-sm" style="height:22px;padding:0 8px;font-size:10px;">Run →</button>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+            <div class="card health-card" style="padding:8px;min-height:unset;gap:4px;">
+              <div class="hc-top" style="gap:6px;"><span class="itile t-success" style="width:20px;height:20px;font-size:10px;">✓</span><div class="section-label" style="font-size:7.5px;">TEST STATUS</div></div>
+              <div style="font:700 12px var(--font-sans);">Passing</div>
+              <span class="badge t-success" style="font-size:8px;"><span class="dot"></span>Pass</span>
+            </div>
+            <div class="card health-card" style="padding:8px;min-height:unset;gap:4px;">
+              <div class="hc-top" style="gap:6px;"><span class="itile t-success" style="width:20px;height:20px;font-size:10px;">🛡</span><div class="section-label" style="font-size:7.5px;">SECURITY</div></div>
+              <div style="font:700 12px var(--font-sans);">Low</div>
+              <span class="badge t-success" style="font-size:8px;"><span class="dot"></span>low</span>
+            </div>
+            <div class="card health-card" style="padding:8px;min-height:unset;gap:4px;">
+              <div class="hc-top" style="gap:6px;"><span class="itile t-warning" style="width:20px;height:20px;font-size:10px;">📦</span><div class="section-label" style="font-size:7.5px;">DEPS</div></div>
+              <div style="font:700 12px var(--font-sans);">3 out</div>
+              <span class="badge t-warning" style="font-size:8px;"><span class="dot"></span>Review</span>
+            </div>
+          </div>
+        </div>
+        <!-- Panel 3 -->
+        <div style="background:var(--surface-3);display:flex;flex-direction:column;">
+          <div style="padding:10px 12px;border-bottom:1px solid var(--border);background:color-mix(in oklab,var(--warning) 5%,var(--surface-3));">
+            <div class="section-label" style="font-size:8.5px;color:var(--warning);">③ EXECUTION MONITOR</div>
+            <div style="font-size:10px;color:var(--muted-foreground);margin-top:3px;">Persistent — always visible</div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;text-align:center;color:var(--muted-foreground);">
+            <div style="font-size:28px;opacity:.35;margin-bottom:8px;">📥</div>
+            <div style="font:600 11px var(--font-sans);color:var(--foreground);">No agent running</div>
+            <div style="font-size:10px;margin-top:3px;line-height:1.45;">Select a repo and start a task to see live progress, logs, and outcomes.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="fr-annotations">
+      <div class="ann">
+        <div class="ann-title">No Context Switching</div>
+        <div class="ann-text">All three domains — navigation, intelligence, and execution — are <strong>always on screen</strong>. Developers never lose their place or their active agent run while browsing.</div>
+      </div>
+      <div class="ann success">
+        <div class="ann-title">Left-to-Right Flow</div>
+        <div class="ann-text">The layout encodes the workflow: <strong>Browse → Understand → Act → Observe.</strong> Each panel naturally preconditions the next decision without instruction.</div>
+      </div>
+      <div class="ann warning">
+        <div class="ann-title">Execution Stays Mounted</div>
+        <div class="ann-text">The right panel persists through long-running AI tasks. Switching repos or scrolling <strong>never hides an active run.</strong></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="cs-rule"></div>
+
+<!-- ══════════════════════════ 02 · REPO LIST ══════════════════════════ -->
+<div class="cs-section">
+  <div class="cs-section-head">
+    <span class="cs-step">02</span>
+    <div>
+      <div class="cs-section-title">Repository List & Health Signals</div>
+      <div class="cs-section-sub">Fast scanning over information density. Each row shows the minimum needed to navigate — name, language, recency, and a single health dot.</div>
+    </div>
+  </div>
+
+  <div class="feature-row" style="grid-template-columns:280px 1fr;">
+    <!-- Actual repo list component -->
+    <div class="fr-component" style="max-width:280px;">
+      <div class="rl-head">
+        <div class="rl-head-row">
+          <div class="section-label">REPOSITORIES</div>
+          <div class="icon-btn">⊟</div>
+        </div>
+        <div class="ff">
+          <div class="ff-label">SEARCH <span class="info-dot">ⓘ</span></div>
+          <div class="input-wrap">
+            <span class="lead-icon">🔍</span>
+            <input class="input" placeholder="Search repositories" readonly/>
+          </div>
+        </div>
+        <div class="rl-filter-bar">
+          <button class="btn btn-secondary btn-sm">⚙ Filters ∨</button>
+          <span class="muted" style="font-size:11px;">10 of 10</span>
+        </div>
+      </div>
+      <div class="rl-list">
+        <div class="rl-item"><div class="name-row"><div class="name-dot"></div><div class="name">developer-portal</div></div><div class="desc">Internal portal for developer workflows.</div><div class="meta"><span class="badge">TypeScript</span><span class="ts">30m ago</span></div></div>
+        <div class="rl-item selected"><div class="name-row"><div class="name-dot"></div><div class="name">design-system-core</div></div><div class="desc">Shared design tokens and component library.</div><div class="meta"><span class="badge">TypeScript</span><span class="ts">2h ago</span></div></div>
+        <div class="rl-item"><div class="name-row"><div class="name-dot"></div><div class="name">mobile-auth-service</div></div><div class="desc">Authentication for mobile clients.</div><div class="meta"><span class="badge">Swift</span><span class="ts">3h ago</span></div></div>
+        <div class="rl-item"><div class="name-row"><div class="name-dot warn"></div><div class="name">payment-orchestration</div></div><div class="desc">Routing across payment providers.</div><div class="meta"><span class="badge">Go</span><span class="ts">5h ago</span></div></div>
+        <div class="rl-item"><div class="name-row"><div class="name-dot"></div><div class="name">search-indexer</div></div><div class="desc">Real-time index for product search.</div><div class="meta"><span class="badge">Rust</span><span class="ts">6h ago</span></div></div>
+        <div class="rl-item"><div class="name-row"><div class="name-dot warn"></div><div class="name">dependency-scanner</div></div><div class="desc">Scans for outdated packages.</div><div class="meta"><span class="badge">Python</span><span class="ts">8h ago</span></div></div>
+      </div>
+    </div>
+
+    <div class="fr-annotations">
+      <div class="ann">
+        <div class="ann-title">Single Health Dot</div>
+        <div class="ann-text"><strong>Green</strong> = tests passing &amp; security not high. <strong>Red</strong> = something needs attention. One signal, read in under a second — no label reading needed.</div>
+      </div>
+      <div class="ann success">
+        <div class="ann-title">Minimal Row — Detail on Demand</div>
+        <div class="ann-text">Each row shows only name, language tag, and recency. <strong>Full detail loads when selected</strong>, not preloaded for all 10 repos. Navigation stays fast.</div>
+      </div>
+      <div class="ann warning">
+        <div class="ann-title">Active Selection is Obvious</div>
+        <div class="ann-text">A <strong>3px indigo left border</strong> marks the selected repo — a pattern borrowed from VS Code's file tree. No ambiguity about which repo is loaded in the center panel.</div>
+      </div>
+      <div class="ann">
+        <div class="ann-title">Search &amp; Filters Always Accessible</div>
+        <div class="ann-text">Search and filter controls live in the rail header — <strong>always visible</strong>, not behind a separate screen. Filter by language, test status, security risk, open PRs, and more.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="cs-rule"></div>
+
+<!-- ══════════════════════════ 03 · HEALTH + INTELLIGENCE ══════════════════════════ -->
+<div class="cs-section">
+  <div class="cs-section-head">
+    <span class="cs-step">03</span>
+    <div>
+      <div class="cs-section-title">Health Cards & Repository Intelligence</div>
+      <div class="cs-section-sub">Three health dimensions always in view. Below them, a prioritised intelligence feed converts raw data into ranked, plain-English findings.</div>
+    </div>
+  </div>
+
+  <!-- Health cards row -->
+  <div style="margin-bottom:24px;">
+    <div class="section-label" style="margin-bottom:12px;">HEALTH <span class="info-dot">ⓘ</span></div>
+    <div class="health-grid-3">
+      <div class="card health-card">
+        <div class="hc-top"><span class="itile t-success">✓</span><div class="section-label">TEST STATUS <span class="info-dot">ⓘ</span></div></div>
+        <div class="hc-vrow"><div class="hc-value">Passing</div><span class="badge t-success"><span class="dot"></span>Pass</span></div>
+        <p class="hc-sub">Latest commit completed successfully.</p>
+        <div class="hc-sugg"><span style="color:var(--success)">✓</span> Safe to run automation</div>
+      </div>
+      <div class="card health-card">
+        <div class="hc-top"><span class="itile t-success">🛡</span><div class="section-label">SECURITY RISK <span class="info-dot">ⓘ</span></div></div>
+        <div class="hc-vrow"><div class="hc-value">Low</div><span class="badge t-success"><span class="dot"></span>low</span></div>
+        <p class="hc-sub">Last scan completed 2 days ago.</p>
+        <div class="hc-sugg"><span style="color:var(--success)">✓</span> Risk signals are current</div>
+      </div>
+      <div class="card health-card">
+        <div class="hc-top"><span class="itile t-warning">📦</span><div class="section-label">DEPENDENCIES <span class="info-dot">ⓘ</span></div></div>
+        <div class="hc-vrow"><div class="hc-value">3 outdated</div><span class="badge t-success"><span class="dot"></span>Healthy</span></div>
+        <p class="hc-sub">1 package may require review.</p>
+        <div class="hc-sugg"><span style="color:var(--success)">✓</span> Recommended: Upgrade Dependencies</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="two-col" style="align-items:start;gap:24px;">
+    <!-- Intelligence feed -->
+    <div>
+      <div class="section-label" style="margin-bottom:12px;">REPOSITORY INTELLIGENCE <span class="info-dot">ⓘ</span></div>
+      <div class="card intel">
+        <div class="intel-row tone-warning">
+          <span class="itile t-warning sm">📦</span>
+          <div>
+            <div class="intel-title-row"><p class="intel-title">3 outdated dependencies detected</p><span class="badge t-warning"><span class="dot"></span>Warning</span></div>
+            <p class="intel-detail">Patch-level updates are available and safe to review.</p>
+          </div>
+        </div>
+        <div class="intel-row tone-success">
+          <span class="itile t-muted sm">🛡</span>
+          <div>
+            <div class="intel-title-row"><p class="intel-title">Security scan is 2 days old</p></div>
+            <p class="intel-detail">Scan freshness is acceptable — risk signals reflect recent state.</p>
+          </div>
+        </div>
+        <div class="intel-row tone-success">
+          <span class="itile t-success sm">✓</span>
+          <div>
+            <div class="intel-title-row"><p class="intel-title">Tests passing on latest commit</p></div>
+            <p class="intel-detail">Latest CI run completed cleanly — automation can proceed safely.</p>
+          </div>
+        </div>
+        <div class="intel-row tone-success">
+          <span class="itile t-muted sm">↑</span>
+          <div>
+            <div class="intel-title-row"><p class="intel-title">4 open pull requests awaiting review</p></div>
+            <p class="intel-detail">Active changes are ready for reviewer attention.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Annotations -->
+    <div class="fr-annotations" style="padding-top:36px;">
+      <div class="ann">
+        <div class="ann-title">Three-Layer Health Cards</div>
+        <div class="ann-text">Each card shows: <strong>(1)</strong> the status value, <strong>(2)</strong> contextual detail ("Last scan 2 days ago"), and <strong>(3)</strong> an operational signal ("Safe to run automation"). A raw number becomes a risk assessment.</div>
+      </div>
+      <div class="ann success">
+        <div class="ann-title">Ordered by Urgency</div>
+        <div class="ann-text">The intelligence feed sorts findings by severity — failing tests surface first, stale scans second. <strong>Developers see the critical issue first</strong> without scanning the whole list.</div>
+      </div>
+      <div class="ann warning">
+        <div class="ann-title">Plain English, Not System Data</div>
+        <div class="ann-text">"3 outdated dependencies detected — Patch-level updates are available and safe to review." Every finding pairs a <strong>title with an implication</strong>. No raw numbers, no jargon.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="cs-rule"></div>
+
+<!-- ══════════════════════════ 04 · RECOMMENDED ACTION + MODAL ══════════════════════════ -->
+<div class="cs-section">
+  <div class="cs-section-head">
+    <span class="cs-step">04</span>
+    <div>
+      <div class="cs-section-title">Recommended Action & Task Selection</div>
+      <div class="cs-section-sub">The system analyses repository signals and surfaces one clear next step. From there, the developer can open a focused task modal and start the agent with repository context intact.</div>
+    </div>
+  </div>
+
+  <div class="task-selection-layout">
+    <!-- Recommended action with two explanation cards directly underneath -->
+    <div class="recommended-block">
+      <div>
+        <div class="section-label" style="margin-bottom:12px;">RECOMMENDED ACTION <span class="info-dot">ⓘ</span></div>
+        <div class="rec">
+          <span class="itile t-info">✦</span>
+          <div style="flex:1;">
+            <div class="rec-title">Upgrade Dependencies</div>
+            <div class="rec-context"><span style="opacity:.85;">Context: </span>Highest-leverage next step given current repository signals.</div>
+          </div>
+          <button class="btn btn-primary btn-sm" style="font-size:12px;">Run →</button>
+        </div>
+      </div>
+
+      <div class="rec-explain-grid">
+        <div class="ann">
+          <div class="ann-title">Five Tasks — No Overload</div>
+          <div class="ann-text">Each task has a short description and a “Best For” label, so the developer can decide quickly without reading extra documentation.</div>
+        </div>
+        <div class="ann">
+          <div class="ann-title">Repo Context in the Header</div>
+          <div class="ann-text">The task modal keeps <strong>design-system-core</strong> visible, so the developer always knows which repository the agent will act on.</div>
+        </div>
+      </div>
+
+      <div class="rec-explain-grid">
+        <div class="ann">
+          <div class="ann-title">Signal-Driven, Not Static</div>
+          <div class="ann-text">The recommendation changes based on repository health. If tests fail, it recommends tests. If security is stale, it recommends a scan.</div>
+        </div>
+        <div class="ann">
+          <div class="ann-title">Context Explains Why</div>
+          <div class="ann-text">The recommendation includes a short context line so the agent feels explainable, not like a black-box action button.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task modal -->
+    <div class="task-modal-side">
+      <div class="modal">
+        <div class="modal-head">
+          <div>
+            <h2>Run Agent Task</h2>
+            <p class="modal-sub">on <strong>design-system-core</strong></p>
+          </div>
+          <button class="icon-btn">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="task sel">
+            <span class="radio"><span class="radio-inner"></span></span>
+            <div><div class="task-name">Upgrade Dependencies</div><p class="task-desc">Analyze outdated packages and prepare dependency updates.</p><p class="task-bf"><b>BEST FOR</b> · Outdated packages or security patches</p></div>
+          </div>
+          <div class="task">
+            <span class="radio"></span>
+            <div><div class="task-name">Run Tests</div><p class="task-desc">Run the repository test suite and summarize failures.</p><p class="task-bf"><b>BEST FOR</b> · Validation before merging</p></div>
+          </div>
+          <div class="task">
+            <span class="radio"></span>
+            <div><div class="task-name">Security Scan</div><p class="task-desc">Check mocked security signals and identify risk areas.</p><p class="task-bf"><b>BEST FOR</b> · Risk review and compliance checks</p></div>
+          </div>
+          <div class="task">
+            <span class="radio"></span>
+            <div><div class="task-name">Refactor Code</div><p class="task-desc">Suggest code cleanup and structural improvements.</p><p class="task-bf"><b>BEST FOR</b> · Maintainability and cleanup</p></div>
+          </div>
+          <div class="task">
+            <span class="radio"></span>
+            <div><div class="task-name">Create Pull Request</div><p class="task-desc">Generate a mocked pull request summary for proposed changes.</p><p class="task-bf"><b>BEST FOR</b> · Packaging changes for review</p></div>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-secondary btn-sm">Cancel</button>
+          <button class="btn btn-primary btn-sm">Start Agent</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="cs-rule"></div>
+
+<!-- ══════════════════════════ 05 · EXECUTION ══════════════════════════ -->
+<div class="cs-section">
+  <div class="cs-section-head">
+    <span class="cs-step">05</span>
+    <div>
+      <div class="cs-section-title">Agent Execution — Live Transparency</div>
+      <div class="cs-section-sub">Trust in AI automation is built through visibility. The panel shows every stage in real time: phase pipeline, streaming logs, agent reasoning, and outcome summary.</div>
+    </div>
+  </div>
+
+  <div class="two-col" style="align-items:start;gap:24px;">
+    <!-- Running state -->
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div style="font:600 11px var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--muted-foreground);">Running state</div>
+      <div class="fr-component">
+        <div class="ae-head">
+          <div class="ae-head-row">
+            <div class="section-label">AGENT EXECUTION</div>
+            <div class="ae-head-actions">
+              <button class="btn btn-secondary btn-sm">↺ Reset</button>
+              <button class="btn btn-secondary btn-sm">↓ Export</button>
+            </div>
+          </div>
+          <div class="ae-subtitle"><strong>Upgrade Dependencies</strong> <span class="muted">·</span> design-system-core</div>
+        </div>
+        <div class="ae-body">
+          <div class="section-label">STATUS <span class="info-dot">ⓘ</span></div>
+          <div class="card status-card">
+            <div class="sc-row"><div class="section-label">TASK</div><span class="badge t-info"><span class="dot"></span>Running</span></div>
+            <div class="sc-task">Upgrade Dependencies</div>
+            <div class="sc-phase-row">
+              <div class="sc-phase-icon"><div class="spinner"></div></div>
+              <div><div class="section-label">PHASE</div><div class="sc-phase-name">Executing</div></div>
+              <div style="text-align:right"><div class="section-label">ELAPSED</div><div class="sc-elapsed">1.8s</div></div>
+            </div>
+            <div class="phase-line">
+              <div class="phase-step state-done"><div class="phase-bullet">✓</div><div class="phase-label">Queued</div></div>
+              <div class="phase-conn done"></div>
+              <div class="phase-step state-done"><div class="phase-bullet">✓</div><div class="phase-label">Preparing</div></div>
+              <div class="phase-conn done"></div>
+              <div class="phase-step state-active"><div class="phase-bullet">3</div><div class="phase-label">Executing</div></div>
+              <div class="phase-conn"></div>
+              <div class="phase-step"><div class="phase-bullet">4</div><div class="phase-label">Completed</div></div>
+            </div>
+            <div class="sc-bar running"><div class="sc-bar-fill"></div></div>
+            <div class="sc-times"><span><span class="time-dot ok"></span>03:03:42 PM <span class="muted">started</span></span><span class="muted">ended <em>running…</em><span class="time-dot active"></span></span></div>
+            <div class="sc-meta">
+              <div class="sc-meta-row"><span class="section-label">⎇ REPOSITORY</span><a class="link" href="#">design-system-core ↗</a></div>
+              <div class="sc-meta-row"><span class="section-label">⎇ BRANCH</span><a class="link" href="#">main ↗</a></div>
+            </div>
+          </div>
+          <div class="card insight-card">
+            <div class="section-label inline"><span class="itile t-info sm">✦</span> AGENT INSIGHT <span class="info-dot">ⓘ</span></div>
+            <p class="insight-text">Analyzing repository context and planning safe, patch-level dependency updates.</p>
+            <p class="muted" style="margin-top:8px;font-size:11.5px;">Confidence: <strong style="color:var(--foreground)">Medium</strong> — partial validation in progress.</p>
+          </div>
+          <div class="section-label">LOGS <span class="info-dot">ⓘ</span></div>
+          <div class="card log" style="max-height:100px;">
+            <div><span class="ts">15:03:43.179</span>Starting "Upgrade Dependencies" on design-system-core</div>
+            <div><span class="ts">15:03:43.926</span>Initializing agent...</div>
+            <div><span class="ts">15:03:44.212</span>Fetching repository metadata...</div>
+            <div><span class="ts">15:03:44.890</span>Analyzing dependency graph...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Annotations + success state -->
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="fr-annotations">
+        <div class="ann">
+          <div class="ann-title">4-Stage Phase Pipeline</div>
+          <div class="ann-text">Queued → Preparing → Executing → Completed. Each stage has a clear visual state — active, done ✓, or failed ✕. <strong>No ambiguous spinner</strong> with no indication of progress.</div>
+        </div>
+        <div class="ann success">
+          <div class="ann-title">Streaming Logs</div>
+          <div class="ann-text">Timestamped lines stream as the agent works. The agent feels like a <strong>live, observable process</strong> — not a black box that returns a result after a delay.</div>
+        </div>
+        <div class="ann warning">
+          <div class="ann-title">Agent Insight — Explainable AI</div>
+          <div class="ann-text">The agent narrates its <strong>reasoning</strong>, not just its actions. Confidence scoring (High / Medium / Low) calibrates how much the developer should trust the result.</div>
+        </div>
+      </div>
+
+      <!-- Success outcome -->
+      <div style="font:600 11px var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--muted-foreground);margin-top:8px;">Completed — success state</div>
+      <div class="card outcome-card outcome-success">
+        <div class="oc-head">
+          <span class="section-label inline"><span style="color:var(--success)">✓</span> OUTCOME <span class="info-dot">ⓘ</span></span>
+          <span class="badge t-success"><span class="dot"></span>Success</span>
+        </div>
+        <div class="oc-headline">Test suite completed successfully</div>
+        <div class="oc-impact-note">Branch is validated and safe to merge.</div>
+        <div class="oc-block">
+          <div class="section-label"><span>⚡</span> IMPACT</div>
+          <div class="oc-impact-grid">
+            <div class="oc-impact-side">Test status: unknown on latest commit</div>
+            <span style="color:var(--muted-foreground);font-size:14px;">→</span>
+            <div class="oc-impact-side strong">Test status: passing on latest commit</div>
+          </div>
+        </div>
+        <div class="oc-block">
+          <div class="section-label">☑ WHAT CHANGED</div>
+          <ul class="oc-changes">
+            <li>Validated test configuration and environment</li>
+            <li>Executed full test suite with no failing assertions</li>
+            <li>Captured pass/fail breakdown and run timing</li>
+          </ul>
+        </div>
+        <div class="oc-next">
+          <div class="section-label">→ NEXT STEP</div>
+          <div class="oc-next-text">Safe to proceed with packaging changes for review.</div>
+        </div>
+        <div class="oc-confidence">
+          <span class="badge t-success">CONFIDENCE · HIGH</span>
+          <span class="muted">Full suite executed without failures.</span>
+        </div>
+      </div>
+
+      <div class="ann success">
+        <div class="ann-title">Before → After Impact Model</div>
+        <div class="ann-text">"Test status: unknown → passing on latest commit." The <strong>diff model</strong> makes the value of the agent run immediately measurable and clear.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="cs-rule"></div>
+
+<!-- ══════════════════════════ 06 · FAILURE ══════════════════════════ -->
+<div class="cs-section">
+  <div class="cs-section-head">
+    <span class="cs-step">06</span>
+    <div>
+      <div class="cs-section-title">Failure Handling & Retry</div>
+      <div class="cs-section-sub">Failures feel recoverable, not terminal. Every error explains what happened, what didn't change, and what to do next — with a one-click Retry.</div>
+    </div>
+  </div>
+
+  <div class="feature-row" style="grid-template-columns:1fr 320px;">
+    <div class="fr-component">
+      <div class="ae-head">
+        <div class="ae-head-row">
+          <div class="section-label">AGENT EXECUTION</div>
+          <div class="ae-head-actions">
+            <button class="btn btn-secondary btn-sm">↺ Reset</button>
+            <button class="btn btn-secondary btn-sm">↓ Export</button>
+          </div>
+        </div>
+        <div class="ae-subtitle"><strong>Security Scan</strong> <span class="muted">·</span> mobile-auth-service</div>
+      </div>
+      <div class="ae-body" style="max-height:none;">
+        <div class="card status-card">
+          <div class="sc-row"><div class="section-label">TASK</div><span class="badge t-danger"><span class="dot"></span>Failed</span></div>
+          <div class="sc-task">Security Scan</div>
+          <div class="sc-phase-row">
+            <div class="sc-phase-icon" style="background:color-mix(in oklab,var(--destructive) 12%,transparent);color:var(--destructive);">✕</div>
+            <div><div class="section-label">PHASE</div><div class="sc-phase-name">Completed</div></div>
+            <div style="text-align:right"><div class="section-label">FAILED AFTER</div><div class="sc-elapsed danger">7.2s</div></div>
+          </div>
+          <div class="phase-line">
+            <div class="phase-step state-done"><div class="phase-bullet">✓</div><div class="phase-label">Queued</div></div>
+            <div class="phase-conn done"></div>
+            <div class="phase-step state-done"><div class="phase-bullet">✓</div><div class="phase-label">Preparing</div></div>
+            <div class="phase-conn done"></div>
+            <div class="phase-step state-done"><div class="phase-bullet">✓</div><div class="phase-label">Executing</div></div>
+            <div class="phase-conn" style="background:var(--destructive);opacity:.4;"></div>
+            <div class="phase-step state-failed"><div class="phase-bullet">✕</div><div class="phase-label">Completed</div></div>
+          </div>
+          <div class="sc-bar danger"><div class="sc-bar-fill" style="width:100%;"></div></div>
+          <div class="sc-times"><span><span class="time-dot ok"></span>03:29:49 PM <span class="muted">started</span></span><span>ended <strong>03:29:56 PM</strong><span class="time-dot" style="background:var(--destructive)"></span></span></div>
+        </div>
+        <div class="card outcome-card outcome-fail">
+          <div class="oc-head">
+            <span class="section-label inline"><span style="color:var(--destructive)">✕</span> OUTCOME <span class="info-dot">ⓘ</span></span>
+            <span class="badge t-danger"><span class="dot"></span>Failed</span>
+          </div>
+          <div class="oc-headline">Execution failed during validation</div>
+          <div class="oc-impact-note">No changes were applied due to failed validation.</div>
+          <div class="oc-block">
+            <div class="section-label">☑ WHAT CHANGED</div>
+            <ul class="oc-changes">
+              <li>Identified failing validation step in test execution</li>
+              <li>Preserved partial logs for inspection</li>
+              <li>No changes were committed due to failed validation</li>
+            </ul>
+          </div>
+          <div class="oc-next danger">
+            <div class="section-label">→ NEXT STEP</div>
+            <div class="oc-next-text">Review the validation error or correct configuration, then retry the run.</div>
+          </div>
+          <div class="oc-confidence">
+            <span class="badge t-danger">CONFIDENCE · LOW</span>
+            <span class="muted">Execution halted before completion.</span>
+          </div>
+        </div>
+        <div class="fail-banner">Validation step failed: simulated lint check returned non-zero exit code.</div>
+        <div style="padding:4px 0 0;display:flex;justify-content:flex-end;">
+          <button class="btn btn-primary btn-sm">↺ Retry</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="fr-annotations">
+      <div class="ann danger">
+        <div class="ann-title">Failure is Explained</div>
+        <div class="ann-text">"Execution failed during validation — No changes applied." The message tells the developer <strong>what happened</strong>, <strong>what didn't change</strong>, and <strong>what to do next</strong>. No cryptic codes.</div>
+      </div>
+      <div class="ann warning">
+        <div class="ann-title">Context-Preserving Retry</div>
+        <div class="ann-text">The Retry button appears at the failure point. Execution context is preserved — the agent restarts cleanly. <strong>Failure feels fixable</strong>, not final.</div>
+      </div>
+      <div class="ann success">
+        <div class="ann-title">Partial Signal Captured</div>
+        <div class="ann-text">"Preserved partial logs for inspection." Even failed runs surface partial findings. <strong>Partial signal is more valuable than silence.</strong></div>
+      </div>
+      <div class="ann">
+        <div class="ann-title">Confidence Scoring</div>
+        <div class="ann-text">Low confidence after a failure explicitly communicates <strong>how much to trust</strong> the partial result. Developers calibrate their next action accordingly.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="cs-rule"></div>
+
+<!-- ══════════════════════════ 07 · DESIGN SYSTEM ══════════════════════════ -->
+<div class="cs-section">
+  <div class="cs-section-head">
+    <span class="cs-step">07</span>
+    <div>
+      <div class="cs-section-title">Visual Design System</div>
+      <div class="cs-section-sub">Apple-inspired enterprise minimalism. Every color, radius, and typographic choice is functional — nothing is decorative.</div>
+    </div>
+  </div>
+
+  <div class="two-col" style="gap:24px;align-items:start;">
+    <!-- Colors -->
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div class="fr-component" style="padding:20px;">
+        <div class="section-label" style="margin-bottom:14px;">SEMANTIC COLOR — 5 ROLES</div>
+        <div style="display:flex;flex-direction:column;gap:0;border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--border);">
+            <div style="width:32px;height:32px;border-radius:8px;background:var(--primary);flex-shrink:0;"></div>
+            <div><div style="font:600 13px var(--font-sans);">Indigo — Primary</div><div style="font-size:11.5px;color:var(--muted-foreground);">Actions, links, selected state, AI features</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--border);">
+            <div style="width:32px;height:32px;border-radius:8px;background:var(--success);flex-shrink:0;"></div>
+            <div><div style="font:600 13px var(--font-sans);">Green — Success</div><div style="font-size:11.5px;color:var(--muted-foreground);">Passing tests, healthy repos, completion</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--border);">
+            <div style="width:32px;height:32px;border-radius:8px;background:var(--warning);flex-shrink:0;"></div>
+            <div><div style="font:600 13px var(--font-sans);">Amber — Warning</div><div style="font-size:11.5px;color:var(--muted-foreground);">Stale scans, moderate risk, review needed</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--border);">
+            <div style="width:32px;height:32px;border-radius:8px;background:var(--destructive);flex-shrink:0;"></div>
+            <div><div style="font:600 13px var(--font-sans);">Red — Danger</div><div style="font-size:11.5px;color:var(--muted-foreground);">Failing tests, high risk, execution failures</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;">
+            <div style="width:32px;height:32px;border-radius:8px;background:var(--surface-1);border:1px solid var(--border);flex-shrink:0;"></div>
+            <div><div style="font:600 13px var(--font-sans);">Cool Neutral</div><div style="font-size:11.5px;color:var(--muted-foreground);">oklch-tinted — 255–265° hue for visual cohesion</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="ann">
+        <div class="ann-title">Color is Never Decorative</div>
+        <div class="ann-text">Each color role is exclusive. <strong>Green appears only for success, red only for danger.</strong> This makes status scannable in under a second — no label reading required.</div>
+      </div>
+    </div>
+
+    <!-- Typography + principles -->
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div class="fr-component" style="padding:20px;">
+        <div class="section-label" style="margin-bottom:14px;">TYPE SYSTEM — SF PRO / SYSTEM STACK</div>
+        <div style="display:flex;flex-direction:column;gap:0;border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+          <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:baseline;justify-content:space-between;gap:8px;">
+            <span style="font:700 26px var(--font-sans);letter-spacing:-.02em;">Page Title</span>
+            <span style="font-size:11px;color:var(--muted-foreground);white-space:nowrap;">28px / 700</span>
+          </div>
+          <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:baseline;justify-content:space-between;gap:8px;">
+            <span style="font:600 16px var(--font-sans);">Card Header</span>
+            <span style="font-size:11px;color:var(--muted-foreground);white-space:nowrap;">16px / 600</span>
+          </div>
+          <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:baseline;justify-content:space-between;gap:8px;">
+            <span style="font-size:14px;">Body and labels</span>
+            <span style="font-size:11px;color:var(--muted-foreground);white-space:nowrap;">14px / 400</span>
+          </div>
+          <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:baseline;justify-content:space-between;gap:8px;">
+            <span style="font:600 10px var(--font-sans);text-transform:uppercase;letter-spacing:.08em;color:var(--muted-foreground);">EYEBROW LABEL</span>
+            <span style="font-size:11px;color:var(--muted-foreground);white-space:nowrap;">10px / 600 / uppercase</span>
+          </div>
+          <div style="padding:10px 14px;display:flex;align-items:baseline;justify-content:space-between;gap:8px;">
+            <span style="font-family:var(--font-mono);font-size:12px;color:var(--primary);">15:03:43.179</span>
+            <span style="font-size:11px;color:var(--muted-foreground);white-space:nowrap;">Mono 12px — logs, timestamps</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="three-col" style="gap:10px;">
+        <div class="ann success" style="padding:12px 14px;">
+          <div class="ann-title" style="margin-bottom:5px;">Spacing-Driven</div>
+          <div class="ann-text" style="font-size:12px;">Groups separated by whitespace, not borders. Hierarchy from breathing room.</div>
+        </div>
+        <div class="ann warning" style="padding:12px 14px;">
+          <div class="ann-title" style="margin-bottom:5px;">Light + Dark</div>
+          <div class="ann-text" style="font-size:12px;">Same token system. Light is primary; dark fully supported for long sessions.</div>
+        </div>
+        <div class="ann" style="padding:12px 14px;">
+          <div class="ann-title" style="margin-bottom:5px;">Accessible</div>
+          <div class="ann-text" style="font-size:12px;">WCAG AA contrast on all status colors. Visible focus states throughout.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════ FOOTER ══════════════════════════ -->
+<footer class="cs-footer">
+  <span>Agentic Developer Portal · UX Case Study · 2026 · Internal Engineering</span>
+  <span>Designed to reduce cognitive load and build trust in AI automation.</span>
+</footer>
+
+</body>
+</html>
