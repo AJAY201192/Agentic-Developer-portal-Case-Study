@@ -224,6 +224,49 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+
+/* Top implementation summary */
+.cs-tech-stack {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 22px 0 26px;
+}
+.cs-tech-pill {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+  border-radius: 12px;
+  background: color-mix(in oklab, var(--surface-1) 72%, var(--card));
+}
+.cs-tech-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--primary);
+  background: color-mix(in oklab, var(--primary) 8%, transparent);
+  font-size: 12px;
+}
+.cs-tech-title {
+  font: 650 11px var(--font-sans);
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--foreground);
+  line-height: 1.2;
+}
+.cs-tech-copy {
+  margin-top: 3px;
+  font-size: 11.5px;
+  color: var(--muted-foreground);
+  line-height: 1.45;
+}
+
 /* Cover */
 .cs-cover {
   background: var(--card);
@@ -449,124 +492,99 @@ body {
 }
 
 
-/* ─── FINAL PRESENTATION POLISH OVERRIDES ─── */
-:root {
-  --presentation-border: color-mix(in oklab, var(--foreground) 7%, transparent);
-  --presentation-soft: color-mix(in oklab, var(--foreground) 3%, var(--card));
-}
-
-/* Make the case-study page more Swiss/minimal and less card-heavy */
-.cs-cover { padding: 68px 64px; }
-.cs-cover-inner { gap: 72px; }
-.cs-section { padding: 64px 64px; }
-.cs-section-head { margin-bottom: 36px; align-items: flex-start; }
-.cs-section-title { font-size: 24px; letter-spacing: -.025em; }
-.cs-section-sub { max-width: 760px; line-height: 1.7; }
-
-/* Remove colored left borders / decorative side accents */
-.ann,
-.ann.success,
-.ann.warning,
-.ann.danger {
-  border-left: 0 !important;
-  border-color: var(--presentation-border) !important;
-  background: color-mix(in oklab, var(--card) 94%, var(--surface-1));
+/* ─── FINAL PRESENTATION POLISH — SWISS MINIMAL ───
+   Keeps color-coded headings/status labels, removes only heavy left accent bars. */
+.ann {
+  border-left: 1px solid var(--border) !important;
   box-shadow: none;
-  padding: 16px 18px;
 }
-.ann-title::before { display: none !important; }
-.ann-title { margin-bottom: 8px; letter-spacing: .11em; color: var(--muted-foreground) !important; }
-.ann.success .ann-title,
-.ann.warning .ann-title,
-.ann.danger .ann-title { color: var(--muted-foreground) !important; }
-.ann-text { color: color-mix(in oklab, var(--foreground) 88%, transparent); line-height: 1.65; }
+.ann-title { color: var(--primary); }
+.ann.success .ann-title { color: var(--success); }
+.ann.warning .ann-title { color: var(--warning); }
+.ann.danger .ann-title { color: var(--destructive); }
 
-/* Remove vertical accent strips from app-demo elements */
-.rl-item.selected::before,
 .rec::before,
-.intel-row::before { display: none !important; }
+.intel-row::before,
+.rl-item.selected::before { display: none !important; }
 
 .rl-item.selected {
-  background: color-mix(in oklab, var(--foreground) 4%, transparent) !important;
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--foreground) 8%, transparent);
-}
-.rl-item { border-bottom-color: color-mix(in oklab, var(--foreground) 6%, transparent); }
-
-.rec {
-  border-color: var(--presentation-border) !important;
-  background: color-mix(in oklab, var(--card) 92%, var(--surface-1)) !important;
-  padding: 16px 18px;
+  background: color-mix(in oklab,var(--primary) 6%,transparent);
+  outline: 1px solid color-mix(in oklab,var(--primary) 16%,transparent);
+  outline-offset: -1px;
 }
 
+.rec,
 .card,
 .fr-component,
 .modal,
 .task,
-.app-chrome {
-  border-color: var(--presentation-border) !important;
+.oc-block,
+.oc-next {
+  box-shadow: none;
 }
 
-/* Quieter cards and task modal */
-.task { background: color-mix(in oklab, var(--card) 96%, var(--surface-1)); }
-.task.sel {
-  border-color: color-mix(in oklab, var(--primary) 24%, var(--presentation-border)) !important;
-  background: color-mix(in oklab, var(--primary) 4%, var(--card)) !important;
-  box-shadow: none !important;
+.fr-component,
+.card,
+.modal,
+.task,
+.ann {
+  border-color: color-mix(in oklab,var(--border) 82%,transparent);
 }
-.modal-body { gap: 9px; }
-.modal-foot { background: color-mix(in oklab, var(--foreground) 3%, var(--card)); }
 
-/* Recommended Action section: annotation cards below the selected task/recommendation */
-.recommended-block { display: flex; flex-direction: column; gap: 14px; }
-.rec-explain-grid {
+.cs-section { max-width: 1180px; }
+.cs-section-head { margin-bottom: 36px; }
+.feature-row, .two-col { gap: 28px !important; }
+.fr-annotations { gap: 14px; }
+.ann { padding: 15px 17px; }
+.ann-text { line-height: 1.65; }
+
+.recommendation-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.recommendation-notes {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
-.rec-explain-grid .ann { min-height: 120px; }
-.task-selection-layout {
-  display: grid;
-  grid-template-columns: minmax(320px, .9fr) minmax(360px, 1.1fr);
-  gap: 28px;
-  align-items: start;
-}
-.task-modal-side { display:flex; flex-direction:column; gap:16px; }
+.recommendation-notes .ann { min-height: 118px; }
 
-/* Cleaner feature grid behavior */
-.feature-row,
-.feature-row.flip,
-.two-col,
-.three-col {
-  gap: 28px;
+.task { border-color: color-mix(in oklab,var(--border) 75%,transparent); }
+.task.sel {
+  border-color: color-mix(in oklab,var(--primary) 35%,var(--border));
+  background: color-mix(in oklab,var(--primary) 4%,transparent);
+  box-shadow: none;
 }
-.fr-annotations { gap: 14px; }
 
-/* Presentation responsiveness */
-@media (max-width: 1080px) {
-  .cs-cover-inner { grid-template-columns: 1fr; gap: 36px; }
+@media (max-width: 1100px) {
+  .cs-cover { padding: 44px 32px; }
+  .cs-cover-inner { grid-template-columns: 1fr; gap: 32px; }
+  .cs-section { padding: 44px 32px; }
   .feature-row,
   .feature-row.flip,
   .two-col,
-  .task-selection-layout {
+  .three-col {
     grid-template-columns: 1fr !important;
   }
   .feature-row.flip .fr-component,
   .feature-row.flip .fr-annotations { order: initial; }
-  .cs-section { padding: 48px 28px; }
-  .cs-cover { padding: 52px 28px; }
-  .cs-rule { margin: 0 28px; }
+  .recommendation-notes { grid-template-columns: 1fr; }
+  .cs-rule { margin: 0 32px; }
 }
 
 @media (max-width: 720px) {
+  .cs-cover { padding: 32px 20px; }
+  .cs-section { padding: 36px 20px; }
   .cs-h1 { font-size: 32px; }
-  .cs-meta { flex-direction: column; gap: 12px; }
-  .rec-explain-grid,
-  .health-grid-3,
+  .cs-section-head { align-items: flex-start; flex-direction: column; gap: 10px; }
   .metric-grid-4,
-  .three-col { grid-template-columns: 1fr !important; }
+  .health-grid-3 { grid-template-columns: 1fr !important; }
   .mini-body { grid-template-columns: 1fr; height: auto; }
-  .mini-rail,
-  .mini-aside { min-height: 180px; }
+  .mini-rail, .mini-aside { min-height: 180px; }
+  .cs-meta { flex-direction: column; gap: 12px; }
+  .cs-tech-stack { grid-template-columns: 1fr; margin: 18px 0 22px; }
+  .cs-footer { padding: 18px 20px; flex-direction: column; align-items: flex-start; gap: 8px; }
 }
 
 </style>
@@ -580,10 +598,42 @@ body {
       <div class="cs-eyebrow">UX Case Study · 2026</div>
       <h1 class="cs-h1">Agentic<br/><em>Developer Portal</em></h1>
       <p class="cs-desc">An AI-native internal tool designed to surface intelligent automation, reduce cognitive load, and make AI execution transparent and trustworthy for engineering teams.</p>
+
+      <div class="cs-tech-stack" aria-label="Implementation summary">
+        <div class="cs-tech-pill">
+          <span class="cs-tech-icon">TS</span>
+          <div>
+            <div class="cs-tech-title">React + TypeScript</div>
+            <div class="cs-tech-copy">Built as a frontend implementation with typed UI behavior.</div>
+          </div>
+        </div>
+        <div class="cs-tech-pill">
+          <span class="cs-tech-icon">DB</span>
+          <div>
+            <div class="cs-tech-title">Mock Data</div>
+            <div class="cs-tech-copy">Repository, health, and task states are simulated for the exercise.</div>
+          </div>
+        </div>
+        <div class="cs-tech-pill">
+          <span class="cs-tech-icon">↯</span>
+          <div>
+            <div class="cs-tech-title">Mock Streaming</div>
+            <div class="cs-tech-copy">Agent logs and status changes simulate real-time execution behavior.</div>
+          </div>
+        </div>
+        <div class="cs-tech-pill">
+          <span class="cs-tech-icon">◫</span>
+          <div>
+            <div class="cs-tech-title">Modular Components</div>
+            <div class="cs-tech-copy">Structured around reusable UI sections and clean component logic.</div>
+          </div>
+        </div>
+      </div>
+
       <div class="cs-meta">
-        <div class="cs-meta-item"><span class="cs-meta-label">Role</span><span class="cs-meta-val">UX / Product Design</span></div>
-        <div class="cs-meta-item"><span class="cs-meta-label">Platform</span><span class="cs-meta-val">Web · AI-Native</span></div>
-        <div class="cs-meta-item"><span class="cs-meta-label">Users</span><span class="cs-meta-val">Internal Engineering</span></div>
+        <div class="cs-meta-item"><span class="cs-meta-label">Role</span><span class="cs-meta-val">UX / UI Development</span></div>
+        <div class="cs-meta-item"><span class="cs-meta-label">Stack</span><span class="cs-meta-val">React · TypeScript</span></div>
+        <div class="cs-meta-item"><span class="cs-meta-label">Data</span><span class="cs-meta-val">Mock Data · Mock Streaming</span></div>
       </div>
     </div>
 
@@ -820,7 +870,7 @@ body {
       </div>
       <div class="ann warning">
         <div class="ann-title">Active Selection is Obvious</div>
-        <div class="ann-text">A <strong>3px indigo left border</strong> marks the selected repo — a pattern borrowed from VS Code's file tree. No ambiguity about which repo is loaded in the center panel.</div>
+        <div class="ann-text">A <strong>soft selected background and subtle outline</strong> marks the active repo. No ambiguity about which repo is loaded in the center panel, without adding heavy decoration.</div>
       </div>
       <div class="ann">
         <div class="ann-title">Search &amp; Filters Always Accessible</div>
@@ -928,13 +978,13 @@ body {
     <span class="cs-step">04</span>
     <div>
       <div class="cs-section-title">Recommended Action & Task Selection</div>
-      <div class="cs-section-sub">The system analyses repository signals and surfaces one clear next step. From there, the developer can open a focused task modal and start the agent with repository context intact.</div>
+      <div class="cs-section-sub">The system analyses repository signals and surfaces the best next action. The modal keeps task selection focused, contextual, and easy to confirm.</div>
     </div>
   </div>
 
-  <div class="task-selection-layout">
-    <!-- Recommended action with two explanation cards directly underneath -->
-    <div class="recommended-block">
+  <div class="two-col" style="align-items:start;gap:28px;margin-bottom:24px;">
+    <!-- Recommended action with the two supporting explanation cards underneath -->
+    <div class="recommendation-stack">
       <div>
         <div class="section-label" style="margin-bottom:12px;">RECOMMENDED ACTION <span class="info-dot">ⓘ</span></div>
         <div class="rec">
@@ -947,31 +997,31 @@ body {
         </div>
       </div>
 
-      <div class="rec-explain-grid">
-        <div class="ann">
+      <div class="recommendation-notes">
+        <div class="ann warning">
           <div class="ann-title">Five Tasks — No Overload</div>
-          <div class="ann-text">Each task has a short description and a “Best For” label, so the developer can decide quickly without reading extra documentation.</div>
+          <div class="ann-text">Each task has a one-line description and a “Best For” label. <strong>Enough to decide quickly</strong> without reading documentation.</div>
         </div>
         <div class="ann">
           <div class="ann-title">Repo Context in the Header</div>
-          <div class="ann-text">The task modal keeps <strong>design-system-core</strong> visible, so the developer always knows which repository the agent will act on.</div>
+          <div class="ann-text">“on design-system-core” keeps the selected repository visible, so the developer always knows where the action will run.</div>
         </div>
       </div>
 
-      <div class="rec-explain-grid">
+      <div class="fr-annotations">
         <div class="ann">
           <div class="ann-title">Signal-Driven, Not Static</div>
-          <div class="ann-text">The recommendation changes based on repository health. If tests fail, it recommends tests. If security is stale, it recommends a scan.</div>
+          <div class="ann-text">The recommendation changes based on what the repo needs. Failing tests recommend tests, high risk recommends scan, outdated packages recommend upgrades.</div>
         </div>
-        <div class="ann">
-          <div class="ann-title">Context Explains Why</div>
-          <div class="ann-text">The recommendation includes a short context line so the agent feels explainable, not like a black-box action button.</div>
+        <div class="ann success">
+          <div class="ann-title">Context Explains the Why</div>
+          <div class="ann-text">The system explains why this action is suggested, so the automation feels transparent rather than black-box.</div>
         </div>
       </div>
     </div>
 
     <!-- Task modal -->
-    <div class="task-modal-side">
+    <div style="display:flex;flex-direction:column;gap:16px;">
       <div class="modal">
         <div class="modal-head">
           <div>
@@ -992,10 +1042,6 @@ body {
           <div class="task">
             <span class="radio"></span>
             <div><div class="task-name">Security Scan</div><p class="task-desc">Check mocked security signals and identify risk areas.</p><p class="task-bf"><b>BEST FOR</b> · Risk review and compliance checks</p></div>
-          </div>
-          <div class="task">
-            <span class="radio"></span>
-            <div><div class="task-name">Refactor Code</div><p class="task-desc">Suggest code cleanup and structural improvements.</p><p class="task-bf"><b>BEST FOR</b> · Maintainability and cleanup</p></div>
           </div>
           <div class="task">
             <span class="radio"></span>
